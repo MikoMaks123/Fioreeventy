@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+@theme {
+  /* §4 — paleta: oryginalne ciemne tła, akcenty w jasnym różu pod logo
+     klientki (białe z różowym napisem). Nazwy tokenów "gold" zostają —
+     wartości są różowe, więc zmiana odcienia to edycja tych 4 linii. */
+  --color-ink: #12100e;
+  --color-ink-soft: #1c1916;
+  --color-gold: #e5a3b6;
+  --color-gold-soft: #f2c1ce;
+  /* wariant różu do małych tekstów na jasnym tle (kontrast >= 4.5:1) */
+  --color-gold-deep: #b14a68;
+  /* czysty biały (decyzja klienta): tekst na ciemnym, jasne sekcje, ramki
+     polaroidów — bez kremowego "latte" */
+  --color-cream: #ffffff;
+  --color-cream-dim: rgb(255 255 255 / 0.62);
+  --color-blush: #c97b6e;
+  --color-line: rgb(229 163 182 / 0.2);
+
+  /* §4 — typografia */
+  --font-display: var(--font-playfair), "Playfair Display", serif;
+  --font-sans: var(--font-dm), "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* cień tylko dla elementów uniesionych */
+  --shadow-lift: 0 24px 60px -20px rgb(0 0 0 / 0.6);
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-ink);
+}
+
+/* §8 — focus ring: złoty, 2px, offset 2px, wszędzie */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* natywny smooth scroll tylko, gdy Lenis NIE działa (fallback bez JS / mobile);
+   z aktywnym Lenisem scroll-behavior musi być auto — inaczej obie mechaniki
+   walczą o scrollTop i scroll się zapętla */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-cream);
+}
+
+/* Natywny date picker na ciemnym tle */
+input[type="date"] {
+  color-scheme: dark;
+}
+.section-light input[type="date"] {
+  color-scheme: light;
+}
+
+/* §4 — ziarno: subtelny noise na sekcjach ciemnych */
+.noise {
+  position: relative;
+}
+.noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Karta glass */
+.glass {
+  background: rgb(18 16 14 / 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-line);
+}
+
+/* Rozwijane panele (akordeon FAQ, „+ Szczegóły") — animacja przez grid-template-rows */
+.acc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.acc-panel[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+.acc-panel > * {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Trzy złote kropki — stan ładowania panelu „Sprawdź datę" */
+@keyframes dotpulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.dot {
+  animation: dotpulse 1s infinite ease-in-out;
+}
+.dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Delikatny pulse dla „ZOSTAŁ 1 TERMIN" */
+@keyframes softpulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.pulse-slow {
+  animation: softpulse 2.2s ease-in-out infinite;
+}
+
+/* Flip karty formularza w stan sukcesu */
+.flip-wrap {
+  perspective: 1400px;
+}
+.flip {
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.flip[data-flipped="true"] {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+  position: absolute;
+  inset: 0;
+}
+/* przód znika z drzewa dostępności dopiero w połowie obrotu —
+   wcześniejsze visibility:hidden gasiłoby kartę od pierwszej klatki */
+.flip-front {
+  visibility: visible;
+  transition: visibility 0s linear;
+}
+.flip[data-flipped="true"] .flip-front {
+  visibility: hidden;
+  transition-delay: 0.35s;
+}
+
+/* kotwice nawigacji nie mogą chować się pod fixed headerem
+   (ścieżka bez Lenis: reduced-motion / mobile) */
+[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+/* Kadr taśmy fotobudkowej / magnes na lodówkę — kremowa ramka */
+.frame-cream {
+  background: var(--color-cream);
+  border-radius: 6px;
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.55);
+}
+
+/* Pozycje podsumowania pakietu — wejście z layout transition */
+@keyframes itemIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.item-enter {
+  animation: itemIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Kafle-magnesy w realizacjach: bazowy przechył w zmiennej, hover prostuje */
+.magnet {
+  transform: rotate(var(--tilt, 0deg));
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    z-index 0s;
+}
+.magnet:hover {
+  transform: rotate(0deg) translateY(-6px) scale(1.03);
+  z-index: 10;
+  box-shadow: var(--shadow-lift);
+}
+
+/* §6 — prefers-reduced-motion: wszystko dojeżdża do stanu końcowego */
+@media (prefers-reduced-motion: reduce) {
+  .dot,
+  .pulse-slow,
+  .item-enter {
+    animation: none;
+  }
+  .flip,
+  .magnet {
+    transition: none;
+  }
+  .flip[data-flipped="true"] .flip-front {
+    transition-delay: 0s;
+  }
+  .marquee-track {
+    transform: none !important;
+  }
+}
